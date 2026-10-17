@@ -1,0 +1,20 @@
+{
+  "modules": [
+    {
+      "path": "src/core/models.py",
+      "inputs": "Song records; artist/title Unicode; used group keys; optional previous song ID",
+      "outputs": "Immutable Song, parsed artist/title, normalized group key, one eligible Song",
+      "units": "duration seconds; ID integer; no physical units otherwise",
+      "frames": "No spatial coordinates; Unicode whitespace/casefold identity",
+      "precision": "Exact integer identity and string equality; duration stored as float seconds from MP3 parser",
+      "state": "No persistent state; selection uses SystemRandom and persisted actual play history",
+      "failure": "ValueError when no eligible song; invalid filename returns empty artist for UI correction",
+      "bounds": {
+        "capacity": "O(N) song catalog scan and candidates memory; local music library scale; no retries or unbounded iteration"
+      },
+      "validation": [
+        "acceptance"
+      ]
+    }
+  ]
+}

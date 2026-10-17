@@ -1,0 +1,20 @@
+name: Build macOS apps
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up private Python and build native app
+        run: bash ./生成Mac应用.command
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MusicaMac-${{ matrix.os }}
+          path: releases/

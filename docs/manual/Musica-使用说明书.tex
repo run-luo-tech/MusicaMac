@@ -1,0 +1,186 @@
+\documentclass[UTF8,fontset=fandol,11pt]{ctexart}
+\usepackage[a4paper,margin=20mm,headheight=16pt]{geometry}
+\usepackage{graphicx,booktabs,tabularx,array,xcolor,tikz,enumitem,fancyhdr,hyperref}
+\usetikzlibrary{arrows.meta,positioning}
+\definecolor{purple}{HTML}{7C3AED}
+\definecolor{ink}{HTML}{302543}
+\definecolor{cream}{HTML}{FFF7ED}
+\definecolor{orange}{HTML}{D94B34}
+\hypersetup{colorlinks=true,linkcolor=purple,urlcolor=purple,pdftitle={Musica 使用说明书},pdfauthor={Musica 项目}}
+\graphicspath{{images/}}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\sffamily\color{purple}MUSICA / 使用说明书}\fancyhead[R]{\small v0.2.0}
+\fancyfoot[L]{\small 本地播放 · 编号查答案 · 多轮不重复}\fancyfoot[R]{\thepage}
+\setlength{\parindent}{0pt}\setlength{\parskip}{6pt}
+\setlist{nosep,leftmargin=1.6em,itemsep=4pt}
+\renewcommand{\arraystretch}{1.35}
+\newcommand{\note}[1]{\par\smallskip\begingroup\setlength{\fboxsep}{10pt}\colorbox{cream}{\parbox{\dimexpr\linewidth-20pt}{#1}}\endgroup\par\smallskip}
+\newcommand{\shot}[3]{\begin{figure}[h!]\centering\includegraphics[width=#2\linewidth]{#1}\caption{#3}\end{figure}}
+\newcommand{\pathtext}[1]{{\small\texttt{\detokenize{#1}}}}
+\begin{document}
+\thispagestyle{empty}
+\vspace*{12mm}
+{\sffamily\fontsize{48}{56}\selectfont\color{purple}MUSICA}\par
+{\sffamily\LARGE 听歌猜曲桌面软件}\par
+\vspace{4mm}{\Large 图文使用说明书与交付指南}\par
+{\color{orange}v0.2.0\quad /\quad 2026 年 10 月 17 日}
+\vspace{7mm}
+\par\noindent\begin{tikzpicture}[every node/.style={font=\sffamily},box/.style={draw=purple!25,fill=purple!7,rounded corners=5pt,minimum height=15mm,text width=43mm,align=center},>=Latex]
+\node[box] (a) {电脑只显示编号\\参与者听歌猜答案};
+\node[box,right=6mm of a] (b) {主持人用手机查表\\不在共享屏幕找答案};
+\node[box,right=6mm of b] (c) {点击揭晓\\歌名与歌手大字展示};
+\draw[->,purple,thick] (a)--(b);\draw[->,purple,thick] (b)--(c);
+\end{tikzpicture}\par
+\vspace{5mm}
+\shot{02-answer.png}{0.86}{揭晓后的显示层级：歌曲名最大，歌手次之，编号作为辅助信息。}
+\note{\textbf{主持人最省事的方式：}拿到发行包后解压，双击程序。Windows 发行 EXE 已包含 Python 和播放依赖，无需安装开发环境。Mac 独立项目已准备好构建及首次配置流程，原生应用包仍需在 Mac 上生成并验证。}
+\vfill
+{\small 本说明书配图来自隔离的演示曲库。示例音频为静音 MP3，不包含用户歌曲。}
+\clearpage
+\section*{1\quad 先选对交付包}
+\par\noindent\begin{tabularx}{\linewidth}{@{}p{29mm}XX@{}}\toprule
+ & Windows 主持人 & Mac 主持人\\\midrule
+推荐使用 & 解压 Windows 便携包，双击 Musica.exe & 原生 Musica.app，复制到“应用程序”后打开\\
+是否安装 Python & 不需要 & 打包后的 .app 不需要\\
+是否联网 & 本地播放不需要 & .app 本地播放不需要；源码首次配置需要\\
+当前交付状态 & 已在本机打包与启动验证 & 独立源码、配置脚本及构建流程已提供；尚无 Mac 实机产物\\\bottomrule
+\end{tabularx}\par
+\subsection*{Windows：三步直接开始}
+\begin{enumerate}
+\item 将 Windows ZIP \textbf{完整解压}到桌面、文档等可写目录。不要在压缩包预览窗口里直接运行。
+\item 双击 \pathtext{Musica.exe}。首次启动会释放内置运行环境，可能稍慢；无需管理员权限。
+\item 打开“曲库管理 / 导出答案”，导入自己的 MP3。发行包不携带音乐。
+\end{enumerate}
+\subsection*{程序和数据放在哪里}
+\par\noindent\begin{tikzpicture}[node distance=4mm,every node/.style={anchor=west,font=\ttfamily\small}]
+\node (a) {Musica-Windows-x64-v0.2.0/};
+\node[below=of a,xshift=7mm] (b) {Musica.exe};
+\node[below=of b] (c) {Musica-使用说明书.pdf};
+\node[below=of c] (d) {data/ \quad library.db + audio/};
+\node[below=of d] (e) {config/ \quad app.json};
+\end{tikzpicture}\par
+
+\texttt{data} 和 \texttt{config} 在运行时生成。若从本源码项目里的启动器或 \texttt{releases} 目录启动，则复用项目根目录的既有曲库；把发行目录独立交给他人后，数据保存在其 EXE 旁。
+\note{\textbf{升级原则：}先退出软件，保留 \texttt{data}，替换程序与说明文件。不要把自己的曲库混进空白发行包，也不要通过覆盖空数据库来升级。}
+\subsection*{适用范围}
+Windows 目标为 Windows 10/11 的 x64 电脑，本机 Windows 11 已执行验证。其他电脑的声卡、杀毒策略与系统版本仍应在活动前试听一次。无需另装播放器或解码包。
+\clearpage
+\section*{2\quad 从 MP3 文件名建立曲库}
+\textbf{推荐命名：}\pathtext{歌手-歌曲名.mp3}，也可写成 \pathtext{歌手 - 歌曲名.mp3}。软件会去掉两侧多余空白，并兼容常见全角及长短横线。
+\par\noindent\begin{tabularx}{\linewidth}{@{}Xll@{}}\toprule
+文件名 & 提取歌手 & 提取歌曲名\\\midrule
+示例歌手-夏日序曲.mp3 & 示例歌手 & 夏日序曲\\
+示例乐队 - 城市夜航.mp3 & 示例乐队 & 城市夜航\\
+未规范命名.mp3 & 留空，需补全 & 未规范命名\\\bottomrule
+\end{tabularx}\par
+\shot{04-import.png}{1}{导入预览直接读取文件名；缺失字段会标为“需补全歌手/歌名”。}
+\begin{enumerate}
+\item 点击“批量导入 MP3”多选文件；“导入文件夹”会包含子文件夹。
+\item 检查歌手和歌曲名。选中一行后可在下方修改，切换行会自动保存。
+\item 同一首歌的不同录音版本，填写“版本备注”，例如现场版。
+\item 点击“确认导入”。软件检查真实 MP3 内容，分配永久编号，再复制到托管曲库。
+\end{enumerate}
+\note{\textbf{文件名不等于音频格式。}把其他文件后缀改为 .mp3 不会变成有效 MP3；无法读取的文件会保留错误状态。原音频不改动，曲库副本以编号命名并删除 ID3 标签。}
+\textbf{分隔符歧义：}若歌手名本身含短横线，如 \pathtext{AC-DC}，使用明确的带空格分隔写法 \pathtext{AC-DC - 歌名.mp3}。歌曲名里的后续横线会保留。完全相同的文件再次导入会跳过。
+\clearpage
+\section*{3\quad 共享屏幕怎样防止泄题}
+\shot{01-question.png}{0.94}{未揭晓时只显示歌曲编号、轮次与中性提示；不显示歌名和歌手。}
+\par\noindent\begin{tabularx}{\linewidth}{@{}p{32mm}X@{}}\toprule
+区域或操作 & 用法\\\midrule
+歌曲编号 & 曲库永久身份，例如 000001；主持人在手机答案表里查同一编号。\\
+播放 / 暂停 & 首次播放成功后，正式模式才把该题记为已用。\\
+重新播放 & 再听当前题，不会增加出题计数。\\
+揭晓答案 & 在电脑上大字展示歌名与歌手；请确认参与者已经作答。\\
+随机下一题 & 切换并隐藏上一题答案；尚未播放的候选不计题。\\
+上一题（回看） & 回看本轮已经播放的题目；不会成为新的重复出题。\\\bottomrule
+\end{tabularx}\par
+\note{\textbf{正式开始前做好准备。}曲库管理和导出界面包含答案；正式模式会禁用管理入口。主持人应提前导入、检查、导出，活动过程中用手机查表。}
+程序不会发布系统媒体歌名或封面。以上防护针对正常共享屏幕操作；直接打开本地数据库或答案表仍能看到答案。按 F11 全屏，Esc 退出全屏。
+\clearpage
+\section*{4\quad 测试、轮次与一场活动}
+\par\noindent\begin{tikzpicture}[node distance=8mm,box/.style={draw=purple!35,fill=purple!7,rounded corners,minimum height=11mm,text width=30mm,align=center,font=\small},>=Latex]
+\node[box] (t) {测试模式\\不记录};
+\node[box,right=of t] (r1) {正式开始\\第一轮};
+\node[box,right=of r1] (r2) {结束本轮\\开始下一轮};
+\node[box,right=of r2] (end) {结束活动\\回到测试};
+\draw[->,thick,purple](t)--(r1);\draw[->,thick,purple](r1)--(r2);\draw[->,thick,purple](r2)--(end);
+\end{tikzpicture}\par
+\textbf{一场活动可以有多轮。}同一场活动的所有轮次共享已用记录；第一轮出过的歌不会再被第二轮抽到。同歌手同歌名的不同版本属于同组，本场只抽其中一个。
+\shot{03-round-ended.png}{0.9}{“结束本轮”保留本场已用记录；下一步点击“开始下一轮”。}
+\begin{itemize}
+\item \textbf{测试模式：}任意试听、切题或揭晓都不记入正式出题记录。
+\item \textbf{结束本轮：}仅结束当前轮，已用记录继续有效。
+\item \textbf{结束活动：}保存历史、回到测试；新开一场活动后可再次使用整库歌曲。
+\item \textbf{中途退出：}不会自动结束活动；重启后点击“恢复未完成活动”，答案仍隐藏。
+\end{itemize}
+只播放一小段后跳过也算使用过；文件未播放或播放启动失败不算使用。出声与数据库保存间存在极短窗口，突然断电时应由主持人检查最后一题。无剩余候选时软件会提示，不会自动循环旧题。
+\clearpage
+\section*{5\quad 手机答案表与备份迁移}
+\subsection*{主持人手机查表}
+\begin{enumerate}
+\item 在曲库管理点击“导出手机答案表”，保存为 HTML。
+\item 将这个文件通过常用文件传输方式发送到手机，再用能运行本地 HTML 的浏览器打开。
+\item 输入电脑显示的编号查歌；也可按歌手或歌名搜索。HTML 无外部资源，正常打开后离线可用。
+\end{enumerate}
+部分聊天软件只预览 HTML 或禁用其中脚本，此时先保存文件，再用浏览器打开；若仍无法搜索，可直接查看表格或另导出 CSV。CSV 为 UTF-8 带 BOM，Excel 可能把编号显示为整数；网页表保留六位编号。
+\par\noindent\begin{tabularx}{\linewidth}{@{}lllX@{}}\toprule
+编号 & 歌手 & 歌曲名 & 版本\\\midrule
+000001 & 示例歌手 & 夏日序曲 & 演示条目\\\bottomrule
+\end{tabularx}\par
+\note{导出的答案表是一份\textbf{快照}。新增歌曲或修改答案后重新导出；不会自动更新手机里的旧文件。}
+\subsection*{备份与跨电脑迁移}
+\begin{enumerate}
+\item 先关闭两台电脑上的软件，避免在写入中复制数据库。
+\item 整体复制 \texttt{data} 文件夹，包含 \texttt{library.db} 与 \texttt{audio}，不要只复制其中之一。
+\item 放到目标平台对应数据位置。编号、答案、歌曲副本和活动历史一起迁移。
+\end{enumerate}
+\par\noindent\begin{tabularx}{\linewidth}{@{}p{31mm}X@{}}\toprule
+平台 & 数据位置\\\midrule
+Windows 便携版 & EXE 同级 \texttt{data}；本源码项目启动时为项目根目录 \texttt{data}。\\
+macOS & \pathtext{~/Library/Application Support/MusicaMac/data}。Finder 的“前往文件夹”可粘贴此路径。\\\bottomrule
+\end{tabularx}\par
+\clearpage
+\section*{6\quad Mac：直接使用与首次配置}
+\subsection*{推荐：拿到原生应用包后使用}
+\begin{enumerate}
+\item 选择与电脑匹配的 Apple Silicon（arm64）或 Intel（x86\_64）发行包。
+\item 解压出 \texttt{Musica.app}，复制到“应用程序”，然后双击。运行依赖包含在应用包里。
+\item 曲库写入当前用户的 Application Support，不写入应用包，也不要求系统目录权限。
+\end{enumerate}
+\note{\textbf{当前状态：}本次工作环境是 Windows。Mac 原生 .app 尚未构建或实机测试；不能把 Windows EXE 改名后交给 Mac 使用。Mac 项目里的构建脚本和 CI 是待执行的生成路径。}
+\subsection*{尚无 .app 时：源码的一次性便捷配置}
+将 \texttt{MusicaMac-Source-v0.2.0.zip} 在 Mac 上解压，双击“首次配置并启动.command”。第一次需要网络：脚本从官方来源安装项目私有 uv、Python 3.12 及依赖；不要求预先安装 Python、Homebrew、Xcode 或 sudo。依赖安装成功后可离线再次运行。
+
+源码目录应放在可写位置，配置期间不要移动它。若直接复制源码导致 command 没有执行权限，可在终端运行 \pathtext{bash ./首次配置并启动.command}。
+\subsection*{给其他主持人生成真正免环境的应用}
+在 Mac 上双击“生成Mac应用.command”。脚本配置环境、测试、打包并进行启动检查，然后生成原生 ZIP。Apple Silicon 与 Intel 需分别在对应架构上构建；不能仅改文件名互换。
+
+生成的开发包仅做临时签名，尚未用 Developer ID 签名、公证。若被系统拦截，确认来源后按 Apple 官方说明在“系统设置 → 隐私与安全性 → 仍要打开”处理单个应用；不要关闭系统整体安全保护。面向广泛分发时应完成正式签名与公证。
+\clearpage
+\section*{7\quad 项目结构、维护与验收边界}
+\par\noindent\begin{tabularx}{\linewidth}{@{}p{39mm}X@{}}\toprule
+位置 & 职责\\\midrule
+\texttt{src/core} & 歌曲身份、文件名解析、候选选择规则。\\
+\texttt{src/adapters} & SQLite、音频、MP3 导入、HTML/CSV 导出。\\
+\texttt{src/pipelines} & 正式活动、轮次、使用记录与恢复。\\
+\texttt{src/apps} & 主持人与参与者共享的桌面界面。\\
+\texttt{tests} & 临时曲库、静音音频与界面回归检查。\\
+\texttt{scripts} & 平台打包、说明书配图等维护入口。\\
+\texttt{releases} & 可交给主持人的发行包，不带私人歌曲。\\
+\texttt{archive} & Windows 历史构建产物，不作为运行入口。\\
+\texttt{docs/manual} & 本说明书 TeX、PDF、独立截图及图件来源。\\\bottomrule
+\end{tabularx}\par
+\subsection*{Windows 维护}
+构建机使用 \pathtext{requirements-build.txt}，运行 \pathtext{scripts/build_windows.ps1}。普通主持人只需发行包。正式数据保留在 \texttt{data}，不要随源代码清理。
+\subsection*{Mac 维护}
+独立项目 \texttt{MusicaMac} 不依赖 Windows 项目目录。手动构建命令为 \pathtext{bash ./生成Mac应用.command}。已提供 GitHub Actions 手动触发流程，分别在 Mac arm64 与 Intel runner 上执行；本次没有上传仓库或触发远端构建。
+\subsection*{验证口径}
+Windows 通用逻辑、真实 MP3 导入、UI 防泄题、持久化恢复和便携路径在本机检查；Mac 通用逻辑在 Windows 上执行回归，原生锁、字体、声卡、首次下载与 .app 签名启动仍待 Mac 实机验证。图示是实际 Windows 界面，不冒充 Mac 截图。
+\subsection*{官方依据}
+{\small
+\begin{itemize}
+\item \href{https://pyinstaller.org/en/stable/operating-mode.html}{PyInstaller：打包包含解释器；目标平台需在对应系统构建。}
+\item \href{https://docs.astral.sh/uv/reference/installer/}{uv：项目私有安装及不修改 shell 配置的安装选项。}
+\item \href{https://docs.github.com/en/actions/reference/runners/github-hosted-runners}{GitHub：macOS 原生 arm64 与 Intel runner。}
+\item \href{https://support.apple.com/en-us/102445}{Apple：首次打开未公证应用的系统处理方式。}
+\end{itemize}}
+\end{document}

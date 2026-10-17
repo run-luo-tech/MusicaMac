@@ -1,0 +1,139 @@
+{
+  "version": "1.0.0",
+  "name": "MusicaMac",
+  "enabled": true,
+  "c_delivery": false,
+  "source_roots": [
+    "src",
+    "run.py",
+    "tests",
+    "scripts"
+  ],
+  "max_files": 5000,
+  "layers": {
+    "core": {
+      "paths": [
+        "src/core"
+      ],
+      "allowed": []
+    },
+    "adapters": {
+      "paths": [
+        "src/adapters"
+      ],
+      "allowed": [
+        "core"
+      ]
+    },
+    "pipelines": {
+      "paths": [
+        "src/pipelines"
+      ],
+      "allowed": [
+        "core",
+        "adapters"
+      ]
+    },
+    "apps": {
+      "paths": [
+        "src/apps",
+        "run.py",
+        "scripts",
+        "scripts"
+      ],
+      "allowed": [
+        "core",
+        "adapters",
+        "pipelines"
+      ]
+    },
+    "tests": {
+      "paths": [
+        "tests"
+      ],
+      "allowed": [
+        "core",
+        "adapters",
+        "pipelines",
+        "apps"
+      ]
+    },
+    "package": {
+      "paths": [
+        "src/__init__.py"
+      ],
+      "allowed": []
+    }
+  },
+  "documents": {
+    "readme": "README.md",
+    "architecture": "docs/architecture.md",
+    "interfaces": "docs/interfaces.md",
+    "environment": "env/README.md",
+    "configuration": "config/README.md",
+    "validation": "docs/validation.md"
+  },
+  "checks": [
+    {
+      "name": "acceptance",
+      "argv": [
+        "python",
+        "scripts/verify.py"
+      ],
+      "covers": [
+        "src/**",
+        "run.py",
+        "tests/**",
+        "scripts/verify.py"
+      ],
+      "inputs": [
+        "requirements.txt",
+        "config/app.json"
+      ],
+      "timeout": 60
+    },
+    {
+      "name": "native-build-on-mac",
+      "argv": [
+        "python",
+        "scripts/build_macos.py"
+      ],
+      "covers": [
+        "scripts/build_macos.py"
+      ],
+      "timeout": 600
+    }
+  ],
+  "config_rules": [
+    {
+      "path": "config/app.json",
+      "fields": [
+        {
+          "key": "schema_version",
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        {
+          "key": "volume",
+          "type": "number",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "key": "selection",
+          "type": "string",
+          "enum": [
+            "random"
+          ]
+        },
+        {
+          "key": "version",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "adopt_existing": false
+}

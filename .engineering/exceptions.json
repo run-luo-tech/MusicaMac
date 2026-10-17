@@ -1,0 +1,16 @@
+{
+  "exceptions": [
+    {
+      "rule": "c-delivery-and-kits",
+      "path": "*",
+      "reason": "User explicitly excludes C migration and KITS lookup/archive for this desktop game; c_delivery=false, no KITS dependency is used.",
+      "validation": "Python acceptance suite, Windows executable build and startup checks; no C claims."
+    },
+    {
+      "rule": "verification-coverage",
+      "path": "scripts/build_macos.py",
+      "reason": "本机为Windows，没有macOS运行时，不能本机执行原生构建；保留未验证状态，不宣称.app交付成功。",
+      "validation": "21项通用回归通过、bash -n检查；构建入口在Windows拒绝执行，真实Tk/.app/签名启动待Mac运行。"
+    }
+  ]
+}
