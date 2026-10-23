@@ -78,7 +78,10 @@ class UITests(unittest.TestCase):
         self.assertEqual(self.app.pending_position, 1.2)
         self.assertEqual(len(self.store.history(self.app.game.session_id)), 0)
         self.app.play()
-        self.assertAlmostEqual(self.app.audio.position(), 1200, delta=150)
+        # Native Tk rendering can take hundreds of ms while audio keeps playing.
+        # Exact elapsed timing is tested directly in test_audio without UI work.
+        self.assertEqual(self.app.audio.offset_ms, 1200)
+        self.assertGreaterEqual(self.app.audio.position(), 1200)
         self.app.commit_seek(0.4)
         self.app.play()
         self.app.commit_seek(1.4)
@@ -88,7 +91,8 @@ class UITests(unittest.TestCase):
         self.assertNotIn("SECRET", self.visible_text())
         self.app.replay()
         self.assertFalse(self.app.audio.paused)
-        self.assertLess(self.app.audio.position(), 150)
+        self.assertEqual(self.app.audio.offset_ms, 0)
+        self.assertTrue(self.app.audio.busy())
         self.assertEqual(len(self.store.history(self.app.game.session_id)), 1)
 
     def test_mouse_drag_preview_is_not_overwritten_and_release_commits(self):

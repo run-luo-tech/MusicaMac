@@ -71,7 +71,7 @@ def smoke_test(app, report):
         app.begin_playback()
         assert app.audio.loaded and app.audio.busy()
         app.commit_seek(1.2)
-        assert 1200 <= app.audio.position() < 1600
+        assert app.audio.offset_ms == 1200 and app.audio.position() >= 1200
         app.play()
         app.commit_seek(0.4)
         assert app.audio.paused and app.audio.position() == 400
