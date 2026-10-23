@@ -6,4 +6,6 @@ apps → pipelines → core/adapters；core 处理身份、分组和选题；ada
 
 依赖归属：源码首次配置脚本下载项目私有 uv/Python/依赖；维护者 build_macos.py 在本机架构构建自包含 .app；最终主持人无需开发环境。Windows 不伪造 Mac 二进制。失败返回真实非零状态，不输出假成功应用包。
 
-验收目标：原生 arm64/x86_64 各自打包；真实 Tk/声卡与 .app 启动；数据目录不随 app 替换丢失；普通账号无需 sudo。通用逻辑本机验证，macOS 行为未实测。
+v0.3.0 同步 Windows aab5210 的进度控制，保留本项目原生字体与快捷键。定位状态属 Audio，拖动预览与未播放起点属 Desktop，不改变 Game/Store 的记题规则或数据格式。
+
+发行按 arm64/x86_64 分别构建，稳定 bundle identifier 为 org.musica.mac。DMG 包含 Musica.app 与 Applications 链接，首次复制安装、更新替换同名 app；数据/配置留在 Application Support。包内测试在隔离 HOME 上检查真实 Tk/MP3/定位和旧活动保留，DMG 经 hdiutil verify。用户确认 v0.2.0 可在 Mac 使用；v0.3.0 原生验证以本次 CI 记录为准。

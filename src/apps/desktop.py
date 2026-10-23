@@ -7,7 +7,7 @@ from src.adapters.audio import Audio
 from src.adapters.library import Library
 from src.pipelines.game import Game
 
-APP_VERSION = "0.2.0"
+APP_VERSION = "0.3.0"
 FONT_FAMILY = "PingFang SC"
 BG = "#FFF7ED"
 CARD = "#FFFFFF"
@@ -33,6 +33,8 @@ class Desktop:
         self.library = Library(store)
         self.audio = Audio(config["volume"])
         self.management = None
+        self.pending_position = 0
+        self.dragging = False
         self.message = "先导入 MP3，再导出手机答案表。测试播放不会记录题目。"
         root.title(f"Musica · 听歌猜曲 v{APP_VERSION}")
         root.geometry("1120x780")
@@ -117,8 +119,17 @@ class Desktop:
         self.next_button.pack(side="left", padx=6)
         self.code_button = button(navigation, "按编号测试", self.select_code)
         self.code_button.pack(side="left", padx=6)
-        self.progress = ttk.Progressbar(card, mode="determinate")
+        self.progress_value = tk.DoubleVar(value=0)
+        self.progress = ttk.Scale(card, from_=0, to=1, variable=self.progress_value,
+                                  takefocus=True)
         self.progress.pack(fill="x", pady=(10, 4))
+        self.progress.bind("<ButtonPress-1>", self.seek_press)
+        self.progress.bind("<B1-Motion>", self.seek_motion)
+        self.progress.bind("<ButtonRelease-1>", self.seek_release)
+        for key, delta in (("Left", -5), ("Right", 5), ("Down", -5), ("Up", 5)):
+            self.progress.bind("<" + key + ">", lambda e, d=delta: self.seek_key(d))
+        self.progress.bind("<Home>", lambda e: self.seek_key(home=True))
+        self.progress.bind("<End>", lambda e: self.seek_key(end=True))
         audio_bar = tk.Frame(card, bg=CARD)
         audio_bar.pack(fill="x")
         self.clock = label(audio_bar, "00:00 / 00:00", 10, MUTED)
@@ -189,24 +200,24 @@ class Desktop:
         except ValueError as exc:
             self.set_message(str(exc))
         except Exception:
-            self.audio.stop()
+            self.stop_playback()
             self.set_message("操作未完成，请检查曲库目录是否可写，或重启后恢复活动。")
         self.render()
 
     def next(self):
-        self.audio.stop()
+        self.stop_playback()
         self.game.revealed = False
         self.attempt(lambda: (self.game.next(), self.set_message("题目已就绪，点击播放。尚未播放不计入已用题目。")))
 
     def previous(self):
-        self.audio.stop()
+        self.stop_playback()
         self.game.revealed = False
         self.attempt(lambda: (self.game.previous(), self.set_message("回看本轮已用题目；重播不会增加计数。")))
 
     def select_code(self):
         code = simpledialog.askstring("按编号测试", "输入歌曲编号（例如 000001）：", parent=self.root)
         if code is not None:
-            self.audio.stop()
+            self.stop_playback()
             self.game.revealed = False
             self.attempt(lambda: self.game.select_code(code))
 
@@ -218,17 +229,19 @@ class Desktop:
             self.begin_playback()
 
     def replay(self):
-        self.begin_playback()
+        self.begin_playback(start=0)
 
-    def begin_playback(self):
+    def begin_playback(self, start=None):
         if not self.game.current:
             return
         try:
-            self.audio.play(self.store.audio_path(self.game.current.id))
+            start = self.pending_position if start is None else start
+            self.audio.play(self.store.audio_path(self.game.current.id), start=start)
+            self.pending_position = 0
             self.game.played()
             self.set_message("正式播放已记录；本场后续选题会排除此歌曲组。" if self.game.formal else "正在测试播放，不记录已用题目。")
         except Exception:
-            self.audio.stop()
+            self.stop_playback()
             self.set_message(f"编号 {self.game.current.code} 播放未完成。请检查 MP3、声音设备或曲库写入权限；未确认成功的新题不会计入记录。")
         self.render()
 
@@ -236,12 +249,12 @@ class Desktop:
         self.attempt(self.game.reveal)
 
     def start(self):
-        self.audio.stop()
+        self.stop_playback()
         self.game.clear()
         self.attempt(lambda: (self.game.start(), self.set_message("正式活动已开始。点击随机下一题，再点击播放。")))
 
     def resume(self):
-        self.audio.stop()
+        self.stop_playback()
         self.attempt(lambda: (self.game.resume(), self.set_message("已恢复活动和跨轮使用记录；上次答案已隐藏。")))
 
     def round_action(self):
@@ -250,14 +263,14 @@ class Desktop:
         if self.game.session["round_open"]:
             if not messagebox.askyesno("结束本轮", "结束当前轮次？已用歌曲会保留到本场活动结束。", parent=self.root):
                 return
-            self.audio.stop()
+            self.stop_playback()
             self.attempt(lambda: (self.game.end_round(), self.set_message("本轮已结束，可以开始下一轮。")))
         else:
             self.attempt(lambda: (self.game.next_round(), self.set_message("新一轮已开始，前面各轮的歌曲仍会排除。")))
 
     def finish(self):
         if messagebox.askyesno("结束活动", "确定结束整场活动？历史将保存，界面回到测试模式。", parent=self.root):
-            self.audio.stop()
+            self.stop_playback()
             self.attempt(lambda: (self.game.finish(), self.set_message("活动已结束。当前为测试模式，下次正式开始将创建新活动。")))
 
     def manage(self):
@@ -265,7 +278,7 @@ class Desktop:
             return
         if self.store.active():
             self.set_message("存在未完成活动。请先恢复并结束活动，再修改曲库；可先导出已有答案。")
-        self.audio.stop()
+        self.stop_playback()
         self.game.clear()
         self.render()
         self.management = LibraryDialog(self)
@@ -276,12 +289,69 @@ class Desktop:
     def refresh_player(self):
         self.play_button.config(text="继续播放" if self.audio.paused else "暂停" if self.audio.busy() else "播放")
         duration = self.game.current.duration if self.game.current else 0
-        pos = min(self.audio.position() / 1000, duration)
+        enabled = bool(self.game.current and duration > 0 and
+                       (not self.game.formal or self.game.session["round_open"]))
+        self.progress.config(to=max(1, duration), state="normal" if enabled else "disabled")
+        if self.dragging:
+            return
+        pos = min(self.audio.position() / 1000, duration) if self.audio.loaded else self.pending_position
         if self.audio.loaded and not self.audio.paused and not self.audio.busy():
             pos = duration
-        self.progress.config(maximum=max(1, duration), value=pos)
+        self.progress_value.set(pos)
+        self.show_time(pos, duration)
+
+    def show_time(self, pos, duration):
         fmt = lambda v: f"{int(v)//60:02d}:{int(v)%60:02d}"
         self.clock.config(text=f"{fmt(pos)} / {fmt(duration)}")
+
+    def stop_playback(self):
+        self.audio.stop()
+        self.pending_position = 0
+        self.dragging = False
+
+    def seek_press(self, event):
+        if self.progress.instate(["disabled"]):
+            return "break"
+        self.dragging = True
+        self.progress.focus_set()
+        return self.seek_motion(event)
+
+    def seek_motion(self, event):
+        if self.dragging and self.game.current:
+            duration = self.game.current.duration
+            left = self.progress.coords(0)[0]
+            right = self.progress.coords(duration)[0]
+            fraction = max(0, min(1, (event.x - left) / max(1, right - left)))
+            self.progress_value.set(fraction * duration)
+            self.show_time(fraction * duration, duration)
+        return "break"
+
+    def seek_release(self, event):
+        if self.dragging:
+            self.seek_motion(event)
+            self.dragging = False
+            self.commit_seek(self.progress_value.get())
+        return "break"
+
+    def seek_key(self, delta=0, home=False, end=False):
+        if not self.progress.instate(["disabled"]) and self.game.current:
+            target = 0 if home else self.game.current.duration if end else self.progress_value.get() + delta
+            self.commit_seek(target)
+        return "break"
+
+    def commit_seek(self, seconds):
+        if not self.game.current:
+            return
+        target = max(0, min(seconds, max(0, self.game.current.duration - 0.05)))
+        try:
+            if self.audio.loaded:
+                self.audio.seek(target)
+            else:
+                self.pending_position = target
+        except Exception:
+            self.stop_playback()
+            self.set_message("调整进度失败，请重新播放或检查 MP3。")
+        self.refresh_player()
 
     def tick(self):
         self.refresh_player()

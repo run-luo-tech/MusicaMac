@@ -70,6 +70,64 @@ class UITests(unittest.TestCase):
         self.assertIsNone(self.store.active())
         self.assertEqual(self.store.db.execute("SELECT count(*) FROM plays").fetchone()[0], 0)
 
+    def test_seek_preview_and_formal_play_counts_once(self):
+        self.app.start()
+        self.app.next()
+        self.app.commit_seek(1.2)
+        self.assertFalse(self.app.audio.loaded)
+        self.assertEqual(self.app.pending_position, 1.2)
+        self.assertEqual(len(self.store.history(self.app.game.session_id)), 0)
+        self.app.play()
+        self.assertAlmostEqual(self.app.audio.position(), 1200, delta=150)
+        self.app.commit_seek(0.4)
+        self.app.play()
+        self.app.commit_seek(1.4)
+        self.assertTrue(self.app.audio.paused)
+        self.assertEqual(self.app.audio.position(), 1400)
+        self.assertEqual(len(self.store.history(self.app.game.session_id)), 1)
+        self.assertNotIn("SECRET", self.visible_text())
+        self.app.replay()
+        self.assertFalse(self.app.audio.paused)
+        self.assertLess(self.app.audio.position(), 150)
+        self.assertEqual(len(self.store.history(self.app.game.session_id)), 1)
+
+    def test_mouse_drag_preview_is_not_overwritten_and_release_commits(self):
+        self.root.deiconify()
+        self.app.next()
+        self.root.update()
+        duration = self.app.game.current.duration
+        left = self.app.progress.coords(0)[0]
+        right = self.app.progress.coords(duration)[0]
+        x = round(left + 0.6 * (right - left))
+        self.app.progress.event_generate("<ButtonPress-1>", x=x, y=8)
+        self.assertTrue(self.app.dragging)
+        preview = self.app.progress_value.get()
+        self.app.refresh_player()
+        self.assertEqual(self.app.progress_value.get(), preview)
+        self.app.progress.event_generate("<B1-Motion>", x=x + 10, y=8)
+        self.app.progress.event_generate("<ButtonRelease-1>", x=x + 10, y=8)
+        self.assertFalse(self.app.dragging)
+        self.assertGreater(self.app.pending_position, duration * 0.6)
+        self.assertFalse(self.app.audio.loaded)
+        self.assertEqual(self.store.db.execute("SELECT count(*) FROM plays").fetchone()[0], 0)
+
+    def test_switch_reset_keyboard_bounds_and_seek_failure(self):
+        self.assertTrue(self.app.progress.instate(["disabled"]))
+        self.app.next()
+        self.app.seek_key(end=True)
+        self.assertLess(self.app.pending_position, self.app.game.current.duration)
+        self.app.seek_key(home=True)
+        self.assertEqual(self.app.pending_position, 0)
+        self.app.commit_seek(1.1)
+        self.app.next()
+        self.assertEqual(self.app.pending_position, 0)
+        self.app.begin_playback()
+        with patch.object(self.app.audio, "seek", side_effect=RuntimeError("SECRET PATH")):
+            self.app.commit_seek(1)
+        self.assertFalse(self.app.audio.loaded)
+        self.assertIn("调整进度失败", self.visible_text())
+        self.assertNotIn("SECRET", self.visible_text())
+
     def test_batch_preview_edit_and_error_remain_visible(self):
         bad = Path(self.tmp.name) / "Artist - Broken.mp3"
         bad.write_text("invalid mp3")
