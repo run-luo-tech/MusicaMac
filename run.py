@@ -64,6 +64,7 @@ def smoke_test(app, report):
     result = {"version": APP_VERSION, "success": False}
     try:
         assert app.progress.winfo_class() == "TScale"
+        assert app.logo_image.width() == 80 and app.logo_label.cget('image')
         app.game.select_code("000001")
         app.render()
         app.commit_seek(0.6)
@@ -79,7 +80,7 @@ def smoke_test(app, report):
         assert app.audio.busy()
         assert app.game.current.title not in app.answer.cget("text")
         result.update(success=True, window=app.root.title(),
-                      checks=["Tk slider", "MP3 playback", "absolute seek", "paused seek", "hidden answer"])
+                      checks=["visible logo", "Tk slider", "MP3 playback", "absolute seek", "paused seek", "hidden answer"])
     except Exception as exc:
         result["error"] = repr(exc)
     finally:

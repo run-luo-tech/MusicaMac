@@ -7,8 +7,9 @@ from src.adapters.audio import Audio
 from src.adapters.library import Library
 from src.pipelines.game import Game
 
-APP_VERSION = "0.3.0"
+APP_VERSION = "0.3.1"
 FONT_FAMILY = "PingFang SC"
+ASSETS = Path(__file__).resolve().parents[2] / "assets"
 BG = "#FFF7ED"
 CARD = "#FFFFFF"
 FG = "#302543"
@@ -40,6 +41,9 @@ class Desktop:
         root.geometry("1120x780")
         root.minsize(940, 720)
         root.configure(bg=BG)
+        self.logo_image = tk.PhotoImage(master=root, file=str(ASSETS / "logo-80.png"))
+        self.window_icon = tk.PhotoImage(master=root, file=str(ASSETS / "logo-256.png"))
+        root.iconphoto(True, self.window_icon)
         self.style()
         self.build()
         root.protocol("WM_DELETE_WINDOW", self.close)
@@ -78,6 +82,8 @@ class Desktop:
         outer.pack(fill="both", expand=True, padx=34, pady=24)
         top = tk.Frame(outer, bg=BG)
         top.pack(fill="x")
+        self.logo_label = tk.Label(top, image=self.logo_image, bg=BG, borderwidth=0)
+        self.logo_label.pack(side="left", padx=(0, 12))
         label(top, "MUSICA", 22, ACCENT, anchor="w").pack(side="left")
         label(top, f"听歌猜曲  /  v{APP_VERSION}", 12, MUTED).pack(side="left", padx=14)
         button(top, "全屏  F11", self.fullscreen).pack(side="right")

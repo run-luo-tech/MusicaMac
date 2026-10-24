@@ -34,6 +34,7 @@ def main():
     checked(sys.executable, '-m', 'unittest', 'discover', '-s', 'tests', '-v')
     checked(sys.executable, '-m', 'PyInstaller', '--noconfirm', '--windowed', '--onedir',
                     '--name', 'Musica', '--osx-bundle-identifier', 'org.musica.mac',
+            '--icon', str(root / 'assets/Musica.icns'), '--add-data', str(root / 'assets') + ':assets',
             '--target-architecture', architecture, '--specpath', 'build', 'run.py')
     package = root / 'dist' / 'Musica.app'
     plist_path = package / 'Contents/Info.plist'

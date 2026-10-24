@@ -5,7 +5,7 @@
 \definecolor{cream}{HTML}{FFF7ED}
 \hypersetup{colorlinks=true,linkcolor=purple,urlcolor=purple,pdftitle={MusicaMac 使用说明书}}
 \graphicspath{{images/}}
-\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\sffamily\color{purple}MUSICA / macOS 使用说明书}\fancyhead[R]{\small v0.3.0}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\sffamily\color{purple}MUSICA / macOS 使用说明书}\fancyhead[R]{\small v0.3.1}
 \fancyfoot[L]{\small 本地播放 · 编号查答案 · 多轮不重复}\fancyfoot[R]{\thepage}
 \setlength{\parindent}{0pt}\setlength{\parskip}{6pt}
 \setlist{nosep,leftmargin=1.6em,itemsep=4pt}
@@ -15,7 +15,8 @@
 \begin{document}
 {\sffamily\Huge\color{purple}MUSICA MAC}\par
 {\Large 听歌猜曲 · 安装、升级与使用}\par
-v0.3.0\quad /\quad 2026 年 10 月 23 日
+v0.3.1\quad /\quad 2026 年 10 月 24 日
+\par 主界面左上角与应用图标采用 Musica Logo，资源内置，离线及替换应用后均可显示。
 \section*{1\quad 下载、首次安装和覆盖升级}
 在 \href{https://github.com/run-luo-tech/MusicaMac/releases/latest}{GitHub Releases} 下载对应架构的 DMG：M 系列芯片选择 arm64，Intel 选择 x86\_64。在苹果菜单“关于本机”可查看芯片类型。普通用户不需要 Source code，也不需要 Python、pip 或额外播放器。
 \begin{enumerate}
@@ -23,7 +24,7 @@ v0.3.0\quad /\quad 2026 年 10 月 23 日
 \item 打开 DMG，将 Musica.app 拖到 Applications。首次使用会安装；已有旧版时选择“替换”。原来放在其他位置的用户，可替换那个位置的同名应用。
 \item 从“应用程序”启动新版。ZIP 下载方式也可使用：完整解压，复制其中的 Musica.app 到原安装位置。
 \end{enumerate}
-\note{\textbf{新装和升级使用同一个包。}歌曲、永久编号、活动记录和个人设置保存在应用外，替换 Musica.app 不会覆盖这些数据。v0.2.0 的 Mac 可用性已由用户确认；v0.3.0 的原生构建与验证结果以对应 Release 为准。}
+\note{\textbf{新装和升级使用同一个包。}歌曲、永久编号、活动记录和个人设置保存在应用外，替换 Musica.app 不会覆盖这些数据。v0.2.0 的 Mac 可用性已由用户确认；v0.3.1 的原生构建与验证结果以对应 Release 为准。}
 \subsection*{数据、配置与备份}
 \pathtext{~/Library/Application Support/MusicaMac/data}\par
 \pathtext{~/Library/Application Support/MusicaMac/config/app.json}
@@ -45,7 +46,7 @@ Apple Silicon 与 Intel 分别构建，CI 验收目标为 macOS 14 与 macOS 15�
 \item 导出手机 HTML 答案表，传到主持人手机；正式活动前完成准备。
 \end{enumerate}
 \begin{center}\includegraphics[width=\linewidth]{04-import.png}\end{center}
-{\small 图示为 Windows v0.3.0 演示界面；Mac 沿用同一布局和操作，使用 PingFang SC 与 Menlo 字体。示例来自隔离静音曲库，不含用户歌曲。}
+{\small 图示为 Windows v0.3.1 演示界面；Mac 沿用同一布局和操作，使用 PingFang SC 与 Menlo 字体。示例来自隔离静音曲库，不含用户歌曲。}
 \note{\textbf{电脑揭晓前只显示编号。}主持人使用手机离线答案表查编号，避免在共享屏幕中打开包含答案的管理窗口。新增歌曲或修改答案后，需要重新导出手机答案表。}
 \subsection*{手机查表和迁移}
 手机收到 HTML 后先保存，再用浏览器打开，按编号、歌名或歌手搜索。聊天软件预览可能禁用脚本；必要时可直接查看表格或导出 CSV。
@@ -54,7 +55,7 @@ Apple Silicon 与 Intel 分别构建，CI 验收目标为 macOS 14 与 macOS 15�
 \clearpage
 \section*{3\quad 播放进度、猜题和活动管理}
 \begin{center}\includegraphics[width=0.72\linewidth]{01-question.png}\end{center}
-{\small Windows v0.3.0 演示截图；Mac 操作相同，图中曲目为 3 秒静音夹具。}
+{\small Windows v0.3.1 演示截图；Mac 操作相同，图中曲目为 3 秒静音夹具。}
 \par\noindent\begin{tabularx}{\linewidth}{@{}p{30mm}X@{}}\toprule
 操作 & 行为\\\midrule
 进度条 & 点击或拖动松开后定位；播放中继续，暂停中保持暂停。\\

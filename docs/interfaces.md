@@ -11,4 +11,6 @@
 
 macOS 入口负责 Application Support 用户目录与 fcntl 进程锁，运行配置自动创建；无 Windows mutex 依赖。
 
+品牌资源：Desktop 从程序资源根目录 assets 加载头部/窗口 PNG 并持有 PhotoImage。构建内置 assets，使用 Musica.icns 作为 .app 图标；原生验收检查主界面 Logo 和包内 ICNS/PNG 与源码资源一致。
+
 run.py 的隐藏 --smoke-report 仅供原生构建验收，在隔离 HOME 上运行包内 Tk、MP3 和定位交互，写 JSON 并正常关闭；普通启动不触发。build_macos.py 在原生系统运行回归、构建、写 bundle 版本、验证架构与临时签名、检查旧数据保留，输出 DMG/ZIP 和验证 JSON。

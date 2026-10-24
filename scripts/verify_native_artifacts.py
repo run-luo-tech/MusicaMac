@@ -38,6 +38,10 @@ def main():
             info = plistlib.loads(archive.read(bundle + 'Info.plist'))
             assert info['CFBundleIdentifier'] == 'org.musica.mac'
             assert info['CFBundleShortVersionString'] == version and info['CFBundleVersion'] == version
+            icon_name = info['CFBundleIconFile']
+            assert archive.read(bundle + 'Resources/' + icon_name) == (root / 'assets/Musica.icns').read_bytes()
+            for filename in ('logo-80.png', 'logo-256.png'):
+                assert archive.read(bundle + 'Resources/assets/' + filename) == (root / 'assets' / filename).read_bytes()
             with archive.open(bundle + 'MacOS/Musica') as binary:
                 magic, actual_cpu = struct.unpack('<II', binary.read(8))
             assert magic == 0xfeedfacf and actual_cpu == cpu, 'Mach-O architecture mismatch'

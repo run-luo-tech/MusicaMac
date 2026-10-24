@@ -88,7 +88,8 @@
       ],
       "inputs": [
         "requirements.txt",
-        "config/app.json"
+        "config/app.json",
+        "assets/*"
       ],
       "timeout": 60
     },
@@ -101,8 +102,10 @@
       "covers": [
         "scripts/build_macos.py",
         "scripts/verify_native_artifacts.py",
+        "scripts/prepare_branding.py",
         ".github/workflows/build-macos.yml"
       ],
+      "inputs": ["assets/*"],
       "timeout": 60
     }
   ],
